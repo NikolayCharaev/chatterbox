@@ -1,12 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Alumni+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Kode+Mono:wght@400..700&display=swap');
+
+
 
 body {
   padding: 0;
   margin: 0;
-  font-family: 'Kode Mono', monospace;
-  font-size: 18px;
+  font-family: "Alumni Sans", sans-serif;
+  font-weight: 400;
+  font-size: 25px;
 }
