@@ -1,9 +1,9 @@
 'use client';
-import React from 'react';
 import { ThemeProvider } from '@material-tailwind/react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { SessionProvider } from 'next-auth/react';
 import { store } from '@/context/store';
+
 
 const Provider = ({ children }) => {
   return (

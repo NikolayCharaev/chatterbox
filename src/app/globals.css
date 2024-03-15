@@ -4,13 +4,24 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
-
 body {
   padding: 0;
   margin: 0;
-  font-family: "Alumni Sans", sans-serif;
+  font-family: 'Alumni Sans', sans-serif;
   font-weight: 400;
   font-size: 25px;
+
+  transition: all .2s ease;
+
+}
+
+
+.dark-mode{
+  background-color: #1C1C1C;
+  color: #fff;
+}
+
+.light-mode {
+  background-color: #fff;
+  color: #000;
 }

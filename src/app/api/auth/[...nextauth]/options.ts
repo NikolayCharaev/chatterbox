@@ -22,7 +22,6 @@ export const options: NextAuthOptions = {
       try {
         await mongoStatus();
         const findUserInDb = await User.findOne({ email: user.email });
-        // localStorage.setItem('person', JSON.stringify(user))
 
         if (!findUserInDb) {
           const newUser = await User.create({
