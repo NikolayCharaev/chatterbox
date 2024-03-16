@@ -1,28 +1,28 @@
 'use client';
-import { useState } from 'react';
-import { useAppDispatch } from '@/utils/hooks';
+import { SetStateAction, useState, useEffect } from 'react';
+import { useAppSelector, useAppDispatch } from '@/utils/hooks';
 import { motion, AnimatePresence } from 'framer-motion';
-import { setAuthModal, setRegisterModal } from '@/context/slices/userSlice';
+import { fetchAuthUser, setAuthModal, setRegisterModal } from '@/context/slices/userSlice';
 import { IoMdClose } from 'react-icons/io';
-import { signIn } from 'next-auth/react';
-import { Card, Input, Button, Typography } from '@material-tailwind/react';
 
+import { Card, Input, Checkbox, Button, Typography } from '@material-tailwind/react';
 import Image from 'next/image';
-import catAuth from '@/assets/cat-4.jpeg';
+import catRegister from '@/assets/cat-5.jpeg';
+import LoginToGoogle from '../LoginToGoogle/index';
 
-import LoginToGoogle from '../LoginToGoogle/LoginToGoogle';
+const RegisterModal = () => {
+  const { user, registerStatus } = useAppSelector((state) => state.user);
 
-const AuthModal = () => {
   const dispatch = useAppDispatch();
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [username, setUsername] = useState<string>('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUserName] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!email || !password) {
+    if (!email || !password || !username) {
       setError('Все поля обязательны для заполнения');
       setTimeout(() => {
         setError('');
@@ -30,24 +30,27 @@ const AuthModal = () => {
       return;
     }
 
-   
     try {
-      const res = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
+      const res = await fetch('api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          username,
+        }),
       });
 
-      if (res.error) {
-        setError('Произошла ошибка авторизации.' + res.error);
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.message); // Отображаем сообщение об ошибке сервера пользователю
 
-        return setTimeout(() => {
+        setTimeout(() => {
           setError('');
         }, 3000);
-      }
-
-      if(res.ok) { 
-        dispatch(setAuthModal(false));
+      } else {
+        alert('Регистрация прошла успешно');
+        dispatch(setRegisterModal(false));
       }
     } catch (err) {
       console.log(err);
@@ -56,17 +59,15 @@ const AuthModal = () => {
 
   return (
     <AnimatePresence>
-      <motion.div
-        exit={{ opacity: 0 }}
-        className="mt-[100px] flex gap-10 items-center">
+      <div className="flex items-center justify-center mt-[100px] gap-10">
         <motion.div
           initial={{ opacity: 0, x: -200 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -200 }}
           className="">
           <Image
-            src={catAuth}
-            alt="войти"
+            alt="регистрация"
+            src={catRegister}
             width={400}
             height={300}
             className="rounded-3xl rotate-6"
@@ -76,13 +77,13 @@ const AuthModal = () => {
           initial={{ opacity: 0, x: 200 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 200 }}
-          className="w-full max-w-[900px]  flex justify-center z-10 bg-white  
+          className="w-[600px] flex justify-center z-10  bg-white  
             flex-col shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] rounded-2xl p-4">
           <div className="flex justify-end mb-4">
             <IoMdClose
               className="cursor-pointer hover:text-red-500 transition text-black"
               onClick={() => {
-                dispatch(setAuthModal(false));
+                dispatch(setRegisterModal(false));
               }}
               size={20}
             />
@@ -90,19 +91,35 @@ const AuthModal = () => {
           <Card className="w-full" color="white" shadow={false}>
             <div className="flex justify-between items-center">
               <Typography variant="h4" color="blue-gray">
-                Авторизация
+                Регистрация
               </Typography>
             </div>
 
             <form onSubmit={handleSubmit} className="mt-8 mb-2  max-w-screen-lg sm:w-96">
               <div className="mb-1 flex flex-col gap-6">
-
+                <Typography variant="h6" color="blue-gray" className="-mb-3">
+                  Ваше Имя
+                </Typography>
+                <Input
+                  value={username}
+                  onChange={(e: { target: { value: SetStateAction<string> } }) =>
+                    setUserName(e.target.value)
+                  }
+                  size="lg"
+                  placeholder="Введите имя или никнейм"
+                  className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                  labelProps={{
+                    className: 'before:content-none after:content-none',
+                  }}
+                />
                 <Typography variant="h6" color="blue-gray" className="-mb-3">
                   Ваш Email
                 </Typography>
                 <Input
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e: { target: { value: SetStateAction<string> } }) =>
+                    setEmail(e.target.value)
+                  }
                   size="lg"
                   placeholder="name@mail.com"
                   className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
@@ -115,7 +132,9 @@ const AuthModal = () => {
                 </Typography>
                 <Input
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e: { target: { value: SetStateAction<string> } }) =>
+                    setPassword(e.target.value)
+                  }
                   type="password"
                   size="lg"
                   placeholder="********"
@@ -125,25 +144,24 @@ const AuthModal = () => {
                   }}
                 />
               </div>
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="text-white bg-red-500 w-max px-4 py-2 rounded-xl text-lg mt-4">
+                    {error}
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <div className="flex flex-col items-center gap-1">
-                <AnimatePresence>
-                  {error && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="text-white bg-red-500 w-max px-4 py-2 rounded-xl text-lg mt-4">
-                      {error}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
                 <Button
-                  type="submit"
                   color="blue"
+                  type="submit"
                   className="mt-6 hover:shadow-[0_10px_20px_rgba(240,_46,_170,_0.7)] transition"
                   fullWidth>
-                  войти
+                  зарегистрироваться
                 </Button>
                 <Typography variant="h6" className="text-center ">
                   или
@@ -151,21 +169,21 @@ const AuthModal = () => {
                 <LoginToGoogle />
               </div>
               <Typography color="gray" className="mt-4 text-center font-normal">
-                У вас нет аккаунта?
+                У вас уже есть аккаунт?
                 <span
                   onClick={() => {
-                    dispatch(setRegisterModal(true));
+                    dispatch(setAuthModal(true));
                   }}
                   className="font-medium text-gray-900 hover:text-red-500 inline-block transition cursor-pointer">
-                  Регистрация
+                  Авторизация
                 </span>
               </Typography>
             </form>
           </Card>
         </motion.div>
-      </motion.div>
+      </div>
     </AnimatePresence>
   );
 };
 
-export default AuthModal;
+export default RegisterModal;

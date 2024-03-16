@@ -1,26 +1,16 @@
 import mongoose, { Schema, models, model } from 'mongoose';
 
-
-
 const ChatShema = new Schema({
-  email: {
-    type: String,
-    unique: [true, 'попробуйте другой email'],
-    required: [true, 'поле обязательно для заполнения'],
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
   },
-  username: {
+  title: {
     type: String,
-    required: [true, 'поле обязательно для заполнения'],
   },
-  password: {
-    type: String,
-    // required: [true, 'поле обязательно для заполнения'],
-  },
-  image : { 
-    type: String
-  }
+  messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }],
 });
 
-const Chat = models.User || model('Chat', ChatShema);
+const Chat = models.Chat || model('Chat', ChatShema);
 
 export default Chat;

@@ -23,6 +23,8 @@ const Header = () => {
   const [localUser, setLocalUser] = useState(JSON.parse(localStorage.getItem('user')));
   const dispatch = useAppDispatch();
 
+
+  console.log(session)
   const [isDarkMode, setIsDarkMode] = useState(() => {
     // Проверяем значение в localStorage
     const storedMode = localStorage.getItem('usehooks-ts-dark-mode');

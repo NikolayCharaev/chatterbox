@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 
-import mongoose from 'mongoose';
 import User from '@/models/user';
 import { mongoStatus } from '@/utils/mongoStatus';
 import bcrypt from 'bcrypt';

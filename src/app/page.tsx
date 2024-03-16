@@ -1,6 +1,6 @@
 import Provider from '@/components/Provider/index';
 import Header from '@/components/Header/index';
-import ModalsWrapper from '@/components/ModalsWrapper/ModalsWrapper';
+import ModalsWrapper from '@/components/ModalsWrapper/index';
 import Content from '@/components/Content/index';
 
 export default function Home() {
