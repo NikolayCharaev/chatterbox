@@ -48,29 +48,24 @@ const RegisterModal = () => {
         setTimeout(() => {
           setError('');
         }, 3000);
-      }else{ 
-        alert('Регистрация прошла успешно')
-        dispatch(setRegisterModal(false))
+      } else {
+        alert('Регистрация прошла успешно');
+        dispatch(setRegisterModal(false));
       }
     } catch (err) {
       console.log(err);
     }
   };
 
-  // useEffect(() => {
-  //   if (registerStatus == 'success') {
-  //     dispatch(fetchAuthUser({ email, password }));
-  //   }
-  // }, [registerStatus]);
 
   return (
     <AnimatePresence>
-      <div className="w-full h-full mt-[100px] mb-[100px] flex justify-center items-center">
+      <div className="flex items-center justify-center mt-[100px] gap-10">
         <motion.div
           initial={{ opacity: 0, x: -200 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -200 }}
-          className="absolute top-[300px] left-[200px] z-0">
+          className="">
           <Image
             alt="регистрация"
             src={catRegister}

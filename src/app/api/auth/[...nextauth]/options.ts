@@ -14,44 +14,43 @@ export const options: NextAuthOptions = {
       //@ts-ignore
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
-    // CredentialsProvider({
-    //   name: 'credentials',
-    //   credentials: {},
-    //   async authorize(credentials) {
-    //     const { email, password } = await credentials;
-    //     try {
-    //       await mongoStatus();
-    //       const user = await User.findOne({ email });
-    //       if (!user) {
-    //         return null;
-    //       }
-    //       const passwordMatch = await bcrypt.compare(password, user.password);
-    //       if (!passwordMatch) {
-    //         return null;
-    //       }
+    CredentialsProvider({
+      name: 'credentials',
+      credentials: {},
+      async authorize(credentials) {
+        const { email, password } = await credentials;
+        try {
+          await mongoStatus();
+          const user = await User.findOne({ email });
+          if (!user) {
+            return null;
+          }
+          const passwordMatch = await bcrypt.compare(password, user.password);
+          if (!passwordMatch) {
+            return null;
+          }
 
-    //       console.log(user)
-    //       return user;
-
-    //       // return NextResponse.json(user, { status: 200 });
-    //     } catch (err) {
-    //       console.log(err);
-    //     }
-    //   },
-    // }),
+          console.log(user);
+          return user;
+        } catch (err) {
+          console.log(err);
+        }
+      },
+    }),
   ],
-  // session: {
-  //   strategy: 'jwt',
-  // },
-  // secret: process.env.NEXTAUTH_SECRET,
-  // pages: {
-  //   signIn: '/',
-  // },
+  session: {
+    strategy: 'jwt',
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+    signIn: '/',
+  },
 
   callbacks: {
     async session({ session }: any) {
       const sessionUser = await User.findOne({ email: session?.user?.email });
       session.user.id = sessionUser?._id?.toString();
+      session.user.name = sessionUser?.username?.toString();
       return session;
     },
     async signIn({ user }) {

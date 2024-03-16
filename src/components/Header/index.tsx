@@ -29,7 +29,6 @@ const Header = () => {
     return storedMode ? JSON.parse(storedMode) : false;
   });
 
-  console.log(session)
   // Обновляем состояние в localStorage при изменении
   useEffect(() => {
     localStorage.setItem('usehooks-ts-dark-mode', JSON.stringify(isDarkMode));
@@ -83,7 +82,7 @@ const Header = () => {
             </div>
           ) : localUser ? (
             <div className="flex gap-4 items-center">
-              <Tooltip className="bg-blue-600" content={localUser.username}>
+              <Tooltip className="bg-blue-600" content={localUser.name}>
                 <Image
                   className="object-cover rounded-2xl"
                   src={catLogout}

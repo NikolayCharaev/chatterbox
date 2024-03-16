@@ -16,6 +16,7 @@ const AuthModal = () => {
   const dispatch = useAppDispatch();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [username, setUsername] = useState<string>('');
   const [error, setError] = useState('');
 
   const handleSubmit = async (event) => {
@@ -29,82 +30,40 @@ const AuthModal = () => {
       return;
     }
 
+   
     try {
-      const res = await fetch('api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+      const res = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
       });
-      const data = await res.json();
-      if (!res.ok) {
 
-        setError(data.message); // Отображаем сообщение об ошибке сервера пользователю
+      if (res.error) {
+        setError('Произошла ошибка авторизации.' + res.error);
 
-        setTimeout(() => {
+        return setTimeout(() => {
           setError('');
         }, 3000);
-      } else {
-        // alert('Авторизация прошла успешно');
-        console.log(data)
-        window.localStorage.setItem('user', JSON.stringify(data))
-        dispatch(setRegisterModal(false));
+      }
 
-        window.location.reload()
+      if(res.ok) { 
+        dispatch(setAuthModal(false));
       }
     } catch (err) {
       console.log(err);
     }
-
-    // try {
-    //   const res = await signIn('credentials', {
-    //     email,
-    //     password,
-    //     redirect: false,
-    //   });
-
-    //   if (res.error) {
-    //     setError('Произошла ошибка авторизации.' + res.error);
-
-    //     return setTimeout(() => {
-    //       setError('');
-    //     }, 3000);
-    //   }
-    // } catch (err) {
-    //   console.log(err);
-    // }
-
-    // const authUser = {
-    //   password,
-    //   email,
-    // };
-
-    // try {
-    //   dispatch(fetchAuthUser(authUser)).then((res) => {
-    //     if (res.type !== 'authUser/rejected') {
-    //       window.localStorage.setItem('user', JSON.stringify(res.payload));
-    //       // window.location.reload();
-    //     } else {
-    //       alert(res.error.message);
-    //     }
-    //   });
-    // } catch (error) {
-    //   console.error('Ошибка при авторизации:', error);
-    // }
   };
 
   return (
     <AnimatePresence>
       <motion.div
         exit={{ opacity: 0 }}
-        className="w-full h-full mt-[100px]  flex justify-center gap-6 items-center">
+        className="mt-[100px] flex gap-10 items-center">
         <motion.div
           initial={{ opacity: 0, x: -200 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -200 }}
-          className="absolute top-[300px] left-[200px] z-0">
+          className="">
           <Image
             src={catAuth}
             alt="войти"
@@ -117,7 +76,7 @@ const AuthModal = () => {
           initial={{ opacity: 0, x: 200 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 200 }}
-          className="w-[600px] flex justify-center z-10 bg-white  
+          className="w-full max-w-[900px]  flex justify-center z-10 bg-white  
             flex-col shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] rounded-2xl p-4">
           <div className="flex justify-end mb-4">
             <IoMdClose
@@ -137,6 +96,7 @@ const AuthModal = () => {
 
             <form onSubmit={handleSubmit} className="mt-8 mb-2  max-w-screen-lg sm:w-96">
               <div className="mb-1 flex flex-col gap-6">
+
                 <Typography variant="h6" color="blue-gray" className="-mb-3">
                   Ваш Email
                 </Typography>
