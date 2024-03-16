@@ -24,6 +24,7 @@ module.exports = withMT({
         '2xl': '1600px',
         '3xl': { max: '1500px' },
       },
+    
     },
   },
   plugins: [],
