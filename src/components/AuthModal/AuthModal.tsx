@@ -2,9 +2,9 @@
 import { useState } from 'react';
 import { useAppDispatch } from '@/utils/hooks';
 import { motion, AnimatePresence } from 'framer-motion';
-import { fetchAuthUser, setAuthModal, setRegisterModal } from '@/context/slices/userSlice';
+import { setAuthModal, setRegisterModal } from '@/context/slices/userSlice';
 import { IoMdClose } from 'react-icons/io';
-
+import { signIn } from 'next-auth/react';
 import { Card, Input, Button, Typography } from '@material-tailwind/react';
 
 import Image from 'next/image';
@@ -16,27 +16,83 @@ const AuthModal = () => {
   const dispatch = useAppDispatch();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const authUser = {
-      password,
-      email,
-    };
+    if (!email || !password) {
+      setError('Все поля обязательны для заполнения');
+      setTimeout(() => {
+        setError('');
+      }, 3000);
+      return;
+    }
 
     try {
-      dispatch(fetchAuthUser(authUser)).then((res) => {
-        if (res.type !== 'authUser/rejected') {
-          window.localStorage.setItem('user', JSON.stringify(res.payload));
-          window.location.reload();
-        } else {
-          alert(res.error.message);
-        }
+      const res = await fetch('api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       });
-    } catch (error) {
-      console.error('Ошибка при авторизации:', error);
+      const data = await res.json();
+      if (!res.ok) {
+
+        setError(data.message); // Отображаем сообщение об ошибке сервера пользователю
+
+        setTimeout(() => {
+          setError('');
+        }, 3000);
+      } else {
+        // alert('Авторизация прошла успешно');
+        console.log(data)
+        window.localStorage.setItem('user', JSON.stringify(data))
+        dispatch(setRegisterModal(false));
+
+        window.location.reload()
+      }
+    } catch (err) {
+      console.log(err);
     }
+
+    // try {
+    //   const res = await signIn('credentials', {
+    //     email,
+    //     password,
+    //     redirect: false,
+    //   });
+
+    //   if (res.error) {
+    //     setError('Произошла ошибка авторизации.' + res.error);
+
+    //     return setTimeout(() => {
+    //       setError('');
+    //     }, 3000);
+    //   }
+    // } catch (err) {
+    //   console.log(err);
+    // }
+
+    // const authUser = {
+    //   password,
+    //   email,
+    // };
+
+    // try {
+    //   dispatch(fetchAuthUser(authUser)).then((res) => {
+    //     if (res.type !== 'authUser/rejected') {
+    //       window.localStorage.setItem('user', JSON.stringify(res.payload));
+    //       // window.location.reload();
+    //     } else {
+    //       alert(res.error.message);
+    //     }
+    //   });
+    // } catch (error) {
+    //   console.error('Ошибка при авторизации:', error);
+    // }
   };
 
   return (
@@ -110,6 +166,18 @@ const AuthModal = () => {
                 />
               </div>
               <div className="flex flex-col items-center gap-1">
+                <AnimatePresence>
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="text-white bg-red-500 w-max px-4 py-2 rounded-xl text-lg mt-4">
+                      {error}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <Button
                   type="submit"
                   color="blue"
@@ -123,7 +191,7 @@ const AuthModal = () => {
                 <LoginToGoogle />
               </div>
               <Typography color="gray" className="mt-4 text-center font-normal">
-                У вас нет аккаунта?{' '}
+                У вас нет аккаунта?
                 <span
                   onClick={() => {
                     dispatch(setRegisterModal(true));

@@ -10,6 +10,7 @@ import { useDarkMode } from 'usehooks-ts';
 
 import { CiLight, CiDark } from 'react-icons/ci';
 
+
 import { setAuthModal } from '@/context/slices/userSlice';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks';
 import { useSession, signIn, signOut } from 'next-auth/react';
@@ -28,6 +29,7 @@ const Header = () => {
     return storedMode ? JSON.parse(storedMode) : false;
   });
 
+  console.log(session)
   // Обновляем состояние в localStorage при изменении
   useEffect(() => {
     localStorage.setItem('usehooks-ts-dark-mode', JSON.stringify(isDarkMode));

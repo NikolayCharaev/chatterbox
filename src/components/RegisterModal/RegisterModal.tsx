@@ -2,16 +2,8 @@
 import { SetStateAction, useState, useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '@/utils/hooks';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  fetchAuthUser,
-  fetchRegisterUser,
-  setAuthModal,
-  setRegisterModal,
-  userRegister,
-} from '@/context/slices/userSlice';
+import { fetchAuthUser, setAuthModal, setRegisterModal } from '@/context/slices/userSlice';
 import { IoMdClose } from 'react-icons/io';
-
-import { useRegisterUserMutation } from '@/context/queries/userQuery';
 
 import { Card, Input, Checkbox, Button, Typography } from '@material-tailwind/react';
 import Image from 'next/image';
@@ -19,34 +11,57 @@ import catRegister from '@/assets/cat-5.jpeg';
 import LoginToGoogle from '../LoginToGoogle/LoginToGoogle';
 
 const RegisterModal = () => {
-  const [registerUser, { isLoading, isError }] = useRegisterUserMutation();
   const { user, registerStatus } = useAppSelector((state) => state.user);
 
   const dispatch = useAppDispatch();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUserName] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const registerNewUser = {
-      username,
-      password,
-      email,
-    };
+
+    if (!email || !password || !username) {
+      setError('Все поля обязательны для заполнения');
+      setTimeout(() => {
+        setError('');
+      }, 3000);
+      return;
+    }
 
     try {
-      dispatch(fetchRegisterUser(registerNewUser));
-    } catch (error) {
-      console.error('Ошибка при регистрации пользователя:', error);
+      const res = await fetch('api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          username,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.message); // Отображаем сообщение об ошибке сервера пользователю
+
+        setTimeout(() => {
+          setError('');
+        }, 3000);
+      }else{ 
+        alert('Регистрация прошла успешно')
+        dispatch(setRegisterModal(false))
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
-  useEffect(() => {
-    if (registerStatus == 'success') {
-      dispatch(fetchAuthUser({ email, password }));
-    }
-  }, [registerStatus]);
+  // useEffect(() => {
+  //   if (registerStatus == 'success') {
+  //     dispatch(fetchAuthUser({ email, password }));
+  //   }
+  // }, [registerStatus]);
 
   return (
     <AnimatePresence>
@@ -135,6 +150,17 @@ const RegisterModal = () => {
                   }}
                 />
               </div>
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="text-white bg-red-500 w-max px-4 py-2 rounded-xl text-lg mt-4">
+                    {error}
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <div className="flex flex-col items-center gap-1">
                 <Button
                   color="blue"
@@ -149,7 +175,7 @@ const RegisterModal = () => {
                 <LoginToGoogle />
               </div>
               <Typography color="gray" className="mt-4 text-center font-normal">
-                У вас уже есть аккаунт?{' '}
+                У вас уже есть аккаунт?
                 <span
                   onClick={() => {
                     dispatch(setAuthModal(true));
